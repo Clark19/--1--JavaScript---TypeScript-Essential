@@ -10,43 +10,15 @@ const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
 // ajax 부분 : XMLHttpRequest. 학습 위해 fetch()와 비동기 사용 안함.
 const ajax = new XMLHttpRequest();
-const newsFeed = getData(NEWS_URL);
-const ul = document.createElement('ul');
 
-// 글 내용 구성 부분 - hashchange 핸들러
-window.addEventListener('hashchange', function() {
-  /* a.addEventListener('click', function()) 방식은 li 마다 클릭 이벤트 
-   리스너 생성 시키는 문제 등이 발생하므로 hashchange 핸들러 방식으로 구현 함 */
-  // console.log('해시가 변경됨');
-  const id = location.hash.substr(1);
-  const newsContent = getData(CONTENT_URL.replace('@id', id));
+const store = {
+  currentPage: 1,
+};
 
-  const title = document.createElement('h1')
-  container.innerHTML = `
-    <h1>${newsContent.title}</h>
 
-    <div>
-      <a href="# ">목록으로</a>
-    </div>
-  `;
-});
-
-// 글 목록 구성 부분
-const newsList = [];
-newsList.push('<ul>');
-for(let i=0; i<10; i++) {
-  const div = document.createElement('div');
-  newsList.push( `
-    <li>
-      <a href="#${newsFeed[i].id}">
-        ${newsFeed[i].title} (${newsFeed[i].comments_count})
-      </a>
-    </li>
-  `);
-}
-newsList.push('</ul>');
-
-container.innerHTML = newsList.join('');
+// 글 내용 구성 & 출력 - hashchange 핸들러
+window.addEventListener('hashchange', router);
+router();
 
 function getData(url) {
   ajax.open('GET', url, false); // 동기 방식: 학습용
@@ -55,4 +27,61 @@ function getData(url) {
   // 문자열 파싱 부분: 내장 객체 사용해 문자열 배열 형태로 변경
   // newsFeed에 무슨 프로퍼티 있는지는 위 API 문서 링크 참고할 것
   return JSON.parse(ajax.response)
+}
+
+// 글 목록 구성 부분
+function newsFeed() {
+  const newsFeed = getData(NEWS_URL);
+  console.log(Math.ceil(31/10))
+  const ul = document.createElement('ul');
+  // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
+  const newsList = [];
+  newsList.push('<ul>');
+  for(let i = (store.currentPage-1)*10; i < store.currentPage*10; i++) {
+    const div = document.createElement('div');
+    newsList.push( `
+      <li>
+        <a href="#/show/${newsFeed[i].id}">
+          ${newsFeed[i].title} (${newsFeed[i].comments_count})
+        </a>
+      </li>
+    `);
+  }
+  newsList.push('</ul>');
+  newsList.push(`
+    <div>
+      <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
+      <a href="#/page/${store.currentPage < Math.ceil(newsFeed.length/10) ? store.currentPage + 1 : Math.ceil(newsFeed.length/10) }">다음 페이지</a>
+    </div>
+  `);
+  
+  container.innerHTML = newsList.join('');
+}
+
+// 글 내용 구성 & 출력
+function newsDetail() {
+  const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
+  const newsContent = getData(CONTENT_URL.replace('@id', id));
+
+  const title = document.createElement('h1');
+  container.innerHTML = `
+    <h1>${newsContent.title}</h>
+
+    <div>
+      <a href="#/page/${store.currentPage}">목록으로</a>
+    </div>
+  `;
+}
+
+function router() {
+  const routePath = location.hash; // hash에 #만 들어있으면 빈문자열 반환
+
+  if (routePath === '') {
+    newsFeed();
+  } else if (routePath.indexOf('#/page/') >= 0) {
+    store.currentPage = Number(routePath.substr(7));
+    newsFeed();
+  } else {
+    newsDetail();
+  }
 }
