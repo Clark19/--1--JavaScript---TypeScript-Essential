@@ -16,9 +16,11 @@ const store = {
 };
 
 
+
 // 글 내용 구성 & 출력 - hashchange 핸들러
 window.addEventListener('hashchange', router);
 router();
+
 
 function getData(url) {
   ajax.open('GET', url, false); // 동기 방식: 학습용
@@ -32,13 +34,23 @@ function getData(url) {
 // 글 목록 구성 부분
 function newsFeed() {
   const newsFeed = getData(NEWS_URL);
-  console.log(Math.ceil(31/10))
-  const ul = document.createElement('ul');
   // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
   const newsList = [];
-  newsList.push('<ul>');
+  
+  let template = `
+    <div>
+      <h1>Hacker News</h1>
+      <ul>
+          {{__news_feed__}}
+      </ul>
+      <div>
+        <a href="#/page/{{__prev_page__}}">이전 페이지</a>
+        <a href="#/page/{{__next_page__}}">다음 페이지</a>
+      </div>
+    </div>
+  `;
+
   for(let i = (store.currentPage-1)*10; i < store.currentPage*10; i++) {
-    const div = document.createElement('div');
     newsList.push( `
       <li>
         <a href="#/show/${newsFeed[i].id}">
@@ -47,15 +59,12 @@ function newsFeed() {
       </li>
     `);
   }
-  newsList.push('</ul>');
-  newsList.push(`
-    <div>
-      <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
-      <a href="#/page/${store.currentPage < Math.ceil(newsFeed.length/10) ? store.currentPage + 1 : Math.ceil(newsFeed.length/10) }">다음 페이지</a>
-    </div>
-  `);
-  
-  container.innerHTML = newsList.join('');
+
+  template = template.replace('{{__news_feed__}}', newsList.join(''));
+  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage -1 : 1 );
+  template = template.replace('{{__next_page__}}', store.currentPage + 1 );
+
+  container.innerHTML = template;
 }
 
 // 글 내용 구성 & 출력
@@ -85,3 +94,11 @@ function router() {
     newsDetail();
   }
 }
+
+
+console.log(xx)
+
+xx=80
+let xx;
+
+console.log(xx)
