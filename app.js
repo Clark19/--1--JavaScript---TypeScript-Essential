@@ -13,6 +13,7 @@ const ajax = new XMLHttpRequest();
 
 const store = {
   currentPage: 1,
+  feeds: []
 };
 
 
@@ -31,9 +32,21 @@ function getData(url) {
   return JSON.parse(ajax.response)
 }
 
+// 읽은 글 표시하기 위한 프로퍼티 추가
+function makeFeeds(feeds) {
+  feeds.forEach(feed => {
+    feed.read = false;
+  });
+  return feeds;
+}
+
 // 글 목록 구성 부분
 function newsFeed() {
-  const newsFeed = getData(NEWS_URL);
+  let newsFeed = null;
+  if (store.feeds.length === 0)
+    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+  else
+    newsFeed = store.feeds;
   // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
   const newsList = [];
   
@@ -64,7 +77,7 @@ function newsFeed() {
 
   for(let i = (store.currentPage-1)*10; i < store.currentPage*10; i++) {
     newsList.push( `
-      <div class="p-6 ${newsFeed[i].read ? 'bg-red-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
+      <div class="p-6 ${newsFeed[i].read ? 'bg-gray-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
         <div class="flex">
           <div class="flex-auto">
             <a href="#/show/${newsFeed[i].id}">${newsFeed[i].title}</a>  
@@ -95,7 +108,7 @@ function newsFeed() {
 function newsDetail() {
   const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
   const newsContent = getData(CONTENT_URL.replace('@id', id));
-
+  
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
@@ -124,6 +137,11 @@ function newsDetail() {
       </div>
     </div>
   `;
+
+  // 읽은 글 표시하기 위한 값 true로 변경
+  const found = store.feeds.find(obj => obj.id === Number(id));
+  if (found != undefined)
+    found.read = true;
 
   function makeComment(comments, called = 0) {
     const commentString = [];
