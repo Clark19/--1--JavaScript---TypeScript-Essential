@@ -1,0 +1,22 @@
+# Include your project-specific ignores in this file
+# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
+# Useful .gitignore templates: https://github.com/github/gitignore
+dist
+.cache
+.idea
+.vscode
+
+# npm 디버그 기록이나 각종 로그 파일
+*.log
+
+# 프로젝트 의존성
+node_modules
+
+# macOS 폴더 속성
+.DS_Store
+
+# 임시 파일
+*.tmp
+*~
+*.bak
+package-lock.json
