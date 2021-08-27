@@ -10,15 +10,27 @@ type Store = {
   feeds: NewsFeed[];
 }
 
-type NewsFeed = {
+type News = {
   id: number;
-  comments_count: number;
+  time_ago: string;
+  title: string;
   url: string;
   user: string;
-  time_ago: string;
+  content: string;
+}
+type NewsFeed = News & {
+  comments_count: number;
   points: number;
-  title: string;
   read?: boolean;
+}
+
+type NewsDetail = News & {
+  comments: NewsComment[];
+}
+
+type NewsComment = News & {
+  comments: NewsComment[];
+  level: number;
 }
 
 const container: HTMLElement | null = document.getElementById('root');
@@ -41,7 +53,7 @@ window.addEventListener('hashchange', router);
 router();
 
 
-function getData(url: string) {
+function getData<AjaxResponse>(url: string): AjaxResponse {
   ajax.open('GET', url, false); // 동기 방식: 학습용
   ajax.send();
   
@@ -51,14 +63,14 @@ function getData(url: string) {
 }
 
 // 읽은 글 표시하기 위한 프로퍼티 추가
-function makeFeeds(feeds: NewsFeed[]) {
+function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   feeds.forEach(feed => {
     feed.read = false;
   });
   return feeds;
 }
 
-function updateView(html: string) {
+function updateView(html: string): void {
   if (container) {
     container.innerHTML = html;
   } else {
@@ -67,10 +79,10 @@ function updateView(html: string) {
 }
 
 // 글 목록 구성 부분
-function newsFeed() {
+function newsFeed(): void {
   let newsFeed: NewsFeed[];
   if (store.feeds.length === 0)
-    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
   else
     newsFeed = store.feeds;
   // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
@@ -124,16 +136,16 @@ function newsFeed() {
   }
 
   template = template.replace('{{__news_feed__}}', newsList.join(''));
-  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage -1 : 1 );
-  template = template.replace('{{__next_page__}}', store.currentPage + 1 );
+  template = template.replace('{{__prev_page__}}', String(store.currentPage > 1 ? store.currentPage -1 : 1) );
+  template = template.replace('{{__next_page__}}', String(store.currentPage + 1) );
 
   updateView(template)
 }
 
 // 글 내용 구성 & 출력
-function newsDetail() {
+function newsDetail(): void {
   const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
-  const newsContent = getData(CONTENT_URL.replace('@id', id));
+  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id));
   
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
@@ -164,37 +176,38 @@ function newsDetail() {
     </div>
   `;
 
-  // 읽은 글 표시하기 위한 값 true로 변경
-  const found = store.feeds.find(obj => obj.id === Number(id));
+  // 읽은 글 표시하기 위한 프로퍼티(read) 추가. 값을 true로 할당
+  const found = store.feeds.find( obj => obj.id === Number(id) );
   if (found != undefined)
     found.read = true;
-
-  function makeComment(comments, called = 0) {
-    const commentString = [];
-
-    for (let i = 0; i < comments.length; i++) {
-      commentString.push(`
-        <div style="padding-left: ${called * 40}px;" class="mt-4">
-          <div class="text-gray-400">
-            <i class="fa fa-sort-up mr-2"></i>
-            <strong>${comments[i].user}</strong> ${comments[i].time_ago}
-          </div>
-          <p class="text-gray-700">${comments[i].content}</p>
-        </div>
-      `);
-
-      if (comments[i].comments.length > 0) {
-        commentString.push(makeComment(comments[i].comments, called + 1));
-      }
-    }
-
-    return commentString.join('');
-  }
 
   updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)));
 }
 
-function router() {
+function makeComment(comments: NewsComment[]): string {
+  const commentString = [];
+
+  for (let i = 0; i < comments.length; i++) {
+    const comment: NewsComment = comments[i];
+    commentString.push(`
+      <div style="padding-left: ${comment.level * 40}px;" class="mt-4">
+        <div class="text-gray-400">
+          <i class="fa fa-sort-up mr-2"></i>
+          <strong>${comment.user}</strong> ${comment.time_ago}
+        </div>
+        <p class="text-gray-700">${comment.content}</p>
+      </div>
+    `);
+
+    if (comment.comments.length > 0) {
+      commentString.push(makeComment(comment.comments));
+    }
+  }
+
+  return commentString.join('');
+}
+
+function router(): void {
   const routePath = location.hash; // hash에 #만 들어있으면 빈문자열 반환
 
   if (routePath === '') {
