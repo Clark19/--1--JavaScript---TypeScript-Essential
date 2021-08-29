@@ -4,7 +4,7 @@ hacker news api 사용(사용 신청도 필요 없어 간단)
 - API 문서: https://github.com/tastejs/hacker-news-pwas/blob/master/docs/api.md
 */
 
-// 타입 alias
+// 타입 생성: interface 이용. 기존 type alias, &(intersection, 상속 유사), |(pipeline, or 유사) 이용.
 interface Store {
   currentPage: number;
   feeds: NewsFeed[];
@@ -46,21 +46,40 @@ const store: Store = {
   feeds: []
 };
 
+class Api {
+  url: string;
+  ajax: XMLHttpRequest;
+
+  constructor(url: string) {
+    this.url = url;
+    this.ajax = new XMLHttpRequest();
+  }
+
+  protected getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open('GET', this.url, false); // 동기 방식: 학습용
+    this.ajax.send()
+
+  /* 문자열 파싱 부분: 내장 객체 사용해 문자열 배열 형태로 변경
+  newsFeed에 무슨 프로퍼티 있는지는 위 API 문서 링크 참고할 것 */
+    return JSON.parse(this.ajax.response)
+  }
+}
+
+class NewsFeedApi extends Api {
+  getData(): NewsFeed[] {
+    return this.getRequest<NewsFeed[]>();
+  }
+}
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
+  }
+}
 
 
 // 글 내용 구성 & 출력 - hashchange 핸들러
 window.addEventListener('hashchange', router);
 router();
-
-
-function getData<AjaxResponse>(url: string): AjaxResponse {
-  ajax.open('GET', url, false); // 동기 방식: 학습용
-  ajax.send();
-  
-  // 문자열 파싱 부분: 내장 객체 사용해 문자열 배열 형태로 변경
-  // newsFeed에 무슨 프로퍼티 있는지는 위 API 문서 링크 참고할 것
-  return JSON.parse(ajax.response)
-}
 
 // 읽은 글 표시하기 위한 프로퍼티 추가
 function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
@@ -78,9 +97,10 @@ function updateView(html: string): void {
 
 // 글 목록 구성 부분
 function newsFeed(): void {
+  const api = new NewsFeedApi(NEWS_URL);
   let newsFeed: NewsFeed[];
   if (store.feeds.length === 0)
-    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(api.getData());
   else
     newsFeed = store.feeds;
   // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
@@ -143,7 +163,8 @@ function newsFeed(): void {
 // 글 내용 구성 & 출력
 function newsDetail(): void {
   const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
-  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id));
+  const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
+  const newsContent = api.getData();
   
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
