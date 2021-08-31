@@ -33,8 +33,12 @@ interface NewsComment extends News {
   readonly level: number;
 }
 
-const container: HTMLElement | null = document.getElementById('root');
-const content = document.createElement('div');
+interface RouteInfo {
+  path: string;
+  page: View;
+}
+
+
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
@@ -77,34 +81,92 @@ class NewsDetailApi extends Api {
 }
 
 
-// 글 내용 구성 & 출력 - hashchange 핸들러
-window.addEventListener('hashchange', router);
-router();
-
-class View {
-  template: string;
-  container: HTMLElement;
+abstract class View {
+  private template: string;
+  private renderTemplate: string;
+  private container: HTMLElement;
+  // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
+  private htmlList: string[];
 
   constructor(containerId: string, template: string) {
-    const containerElement = document.getElementById(container);
+    const containerElement = document.getElementById(containerId);
     if (!containerElement) {
       throw '최상위 컨테이너가 없어 UI를 진행하지 못합니다.';
     }
 
     this.container = containerElement;
     this.template = template;
+    this.renderTemplate = template;
+    this.htmlList = [];
   }
 
-  updateView(html: string): void {
-      this.container.innerHTML = html;
+  protected updateView(): void {
+      this.container.innerHTML = this.renderTemplate;
+      this.renderTemplate = this.template;
   }
 
+  protected addHtml(htmlString: string): void {
+    this.htmlList.push(htmlString);
+  }
+
+  protected getHtml(): string {
+    const snapshot = this.htmlList.join('');
+    this.clearHtmlList();
+    return snapshot;
+  }
+
+  protected setTemplateData(key: string, value: string): void {
+    this.renderTemplate = this.renderTemplate.replace(`{{__${key}__}}`, value);
+  }
+
+  private clearHtmlList(): void {
+    this.htmlList = [];
+  }
+
+  abstract render(): void;
+}
+
+class Router {
+  routeTable: RouteInfo[];
+  defaultRoute: RouteInfo | null;
+
+  constructor() {
+    // 글 내용 구성 & 출력 - hashchange 핸들러
+    /* browser의 이벤트 시스템이 route 메서드를 호출하는게 되므로, 호출시 this context는 Router의 인스턴스가 아니게 됨.
+      처음 라우터 객체 생성시 라우터의 this를 고정 시켜줘야 함. 등록 시점의 this context로 고정시켜 줘야 함. */
+    window.addEventListener('hashchange', this.route.bind(this));
+
+    this.routeTable = [];
+    this.defaultRoute = null;
+  }
+
+  setDefaultPage(page: View): void {
+    this.defaultRoute = { path: '', page}
+  }
+  addRoutePath(path: string, page: View): void {
+    this.routeTable.push({ path, page });
+  }
+
+  route() {
+    const routePath = location.hash; // hash에 #만 들어있으면 빈문자열 반환
+
+    if (routePath === '' && this.defaultRoute) {
+      this.defaultRoute.page.render();
+    }
+
+    for (const routeInfo of this.routeTable) {
+      if (routePath.indexOf(routeInfo.path) >= 0) {
+        routeInfo.page.render();
+        break;
+      }
+    }
+  }
 }
 
 // 글 목록 구성 부분
 class NewsFeedView extends View {
-  api: NewsFeedApi;
-  feeds: NewsFeed[];
+  private api: NewsFeedApi;
+  private feeds: NewsFeed[];
 
   constructor(containerId: string) {
     let template = `
@@ -138,57 +200,56 @@ class NewsFeedView extends View {
   
   // if(this.feeds.length ===0)  ??
   if (store.feeds.length === 0)
-    this.feeds = store.feeds = this.makeFeeds(this.api.getData());
+    this.feeds = store.feeds = this.api.getData();
   else
     this.feeds = store.feeds;
+  this.makeFeeds();
   }
 
   render(): void {
-    // !! 문자열 구성시 자주 사용하는 테크닉 중 하나: 배열에 무자열 쌓아놓고 나중에 join('')으로 합쳐서 리턴
-    const newsList = [];
+    store.currentPage = Number(location.hash.substr(7) || 1);
     for(let i = (store.currentPage-1)*10; i < store.currentPage*10; i++) {
-      newsList.push( `
-        <div class="p-6 ${newsFeed[i].read ? 'bg-gray-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
+      const { id, title, comments_count, user, points, time_ago, read } = this.feeds[i];
+      this.addHtml( `
+        <div class="p-6 ${read ? 'bg-gray-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
           <div class="flex">
             <div class="flex-auto">
-              <a href="#/show/${newsFeed[i].id}">${newsFeed[i].title}</a>  
+              <a href="#/show/${id}">${title}</a>  
             </div>
             <div class="text-center text-sm">
-              <div class="w-10 text-white bg-green-300 rounded-lg px-0 py-2">${newsFeed[i].comments_count}</div>
+              <div class="w-10 text-white bg-green-300 rounded-lg px-0 py-2">${comments_count}</div>
             </div>
           </div>
           <div class="flex mt-3">
             <div class="grid grid-cols-3 text-sm text-gray-500">
-              <div><i class="fas fa-user mr-1"></i>${newsFeed[i].user}</div>
-              <div><i class="fas fa-heart mr-1"></i>${newsFeed[i].points}</div>
-              <div><i class="far fa-clock mr-1"></i>${newsFeed[i].time_ago}</div>
+              <div><i class="fas fa-user mr-1"></i>${user}</div>
+              <div><i class="fas fa-heart mr-1"></i>${points}</div>
+              <div><i class="far fa-clock mr-1"></i>${time_ago}</div>
             </div>  
           </div>
         </div>
       `);
     }
   
-    template = template.replace('{{__news_feed__}}', newsList.join(''));
-    template = template.replace('{{__prev_page__}}', String(store.currentPage > 1 ? store.currentPage -1 : 1) );
-    template = template.replace('{{__next_page__}}', String(store.currentPage + 1) );
+    this.setTemplateData('news_feed', this.getHtml());
+    this.setTemplateData('prev_page', String(store.currentPage > 1 ? store.currentPage -1 : 1) );
+    this.setTemplateData('next_page', String(store.currentPage + 1) );
   
-    updateView(template)
+    this.updateView()
   }
 
   // 읽은 글 표시하기 위한 프로퍼티 추가
-  makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
-    feeds.forEach(feed => feed.read = false);
-  return feeds;
+  private makeFeeds() {
+    this.feeds.forEach(feed => feed.read = false);
 }
 
 }
-function newsFeed(): void {
-}
+
 
 // 글 내용 구성 & 출력
 class NewsDetailView extends View {
-  constructor() {
-    let template = `
+  constructor(containId: string) {
+    let template: string = `
       <div class="bg-gray-600 min-h-screen pb-8">
         <div class="bg-white text-xl">
           <div class="mx-auto px-4">
@@ -197,7 +258,7 @@ class NewsDetailView extends View {
                 <h1 class="font-extrabold">Hacker News</h1>
               </div>
               <div class="items-center justify-end">
-                <a href="#/page/${store.currentPage}" class="text-gray-500">
+                <a href="#/page/{{__currentPage__}}" class="text-gray-500">
                   <i class="fa fa-times"></i>
                 </a>
               </div>
@@ -206,9 +267,9 @@ class NewsDetailView extends View {
         </div>
 
         <div class="h-full border rounded-xl bg-white m-6 p-4 ">
-          <h2>${newsContent.title}</h2>
+          <h2>{{__title__}}</h2>
           <div class="text-gray-400 h-20">
-            ${newsContent.content}
+            {{__content__}}
           </div>
 
           {{__comments__}}
@@ -216,27 +277,31 @@ class NewsDetailView extends View {
         </div>
       </div>
     `;
+
+    super(containId, template);
   }
 
   render() {
     const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
     const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
-    const newsContent = api.getData();
+    const newsDetail: NewsDetail = api.getData();
 
     // 읽은 글 표시하기 위한 프로퍼티(read) 추가. 값을 true로 할당
     const found = store.feeds.find( obj => obj.id === Number(id) );
     if (found != undefined)
       found.read = true;
 
-    updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)));
+    this.setTemplateData('comments', this.makeComment(newsDetail.comments));
+    this.setTemplateData('currentPage', String(store.currentPage));
+    this.setTemplateData('title', newsDetail.title);
+    this.setTemplateData('content', newsDetail.content);
+    this.updateView();
   }
 
   makeComment(comments: NewsComment[]): string {
-    const commentString = [];
-  
     for (let i = 0; i < comments.length; i++) {
       const comment: NewsComment = comments[i];
-      commentString.push(`
+      this.addHtml(`
         <div style="padding-left: ${comment.level * 40}px;" class="mt-4">
           <div class="text-gray-400">
             <i class="fa fa-sort-up mr-2"></i>
@@ -247,27 +312,23 @@ class NewsDetailView extends View {
       `);
   
       if (comment.comments.length > 0) {
-        commentString.push(makeComment(comment.comments));
+        this.addHtml(this.makeComment(comment.comments));
       }
     }
   
-    return commentString.join('');
+    return this.getHtml();
   }
 
 }
-function newsDetail(): void {
-  
-}
 
-function router(): void {
-  const routePath = location.hash; // hash에 #만 들어있으면 빈문자열 반환
 
-  if (routePath === '') {
-    newsFeed();
-  } else if (routePath.indexOf('#/page/') >= 0) {
-    store.currentPage = Number(routePath.substr(7));
-    newsFeed();
-  } else {
-    newsDetail();
-  }
-}
+const router: Router = new Router();
+const newsFeedView = new NewsFeedView('root');
+const newsDetailView = new NewsDetailView('root');
+
+router.setDefaultPage(newsFeedView);
+router.addRoutePath('/page/', newsFeedView);
+router.addRoutePath('/show/', newsDetailView);
+
+
+router.route();
