@@ -1,6 +1,6 @@
 import View from '../core/view';
 import { NewsFeedApi } from '../core/api';
-import { NewsFeed } from '../types';
+import { NewsFeed, NewsStore } from '../types';
 import { NEWS_URL } from '../config';
 
 const template = `
@@ -31,25 +31,23 @@ const template = `
 // 글 목록 구성 부분
 export default class NewsFeedView extends View {
   private api: NewsFeedApi;
-  private feeds: NewsFeed[];
+  private store: NewsStore;
 
-  constructor(containerId: string) {
+  constructor(containerId: string, store: NewsStore) {
     super(containerId, template);
     
+    this.store = store;
     this.api = new NewsFeedApi(NEWS_URL);
   
-  // if(this.feeds.length ===0)  ??
-  if (window.store.feeds.length === 0)
-    this.feeds = window.store.feeds = this.api.getData();
-  else
-    this.feeds = window.store.feeds;
-  this.makeFeeds();
+    if (!this.store.hasFeeds)
+      this.store.setFeeds(this.api.getData());
   }
 
+  // render = (page: string = '1'): void => {
   render(): void {
-    window.store.currentPage = Number(location.hash.substr(7) || 1);
-    for(let i = (window.store.currentPage-1)*10; i < window.store.currentPage*10; i++) {
-      const { id, title, comments_count, user, points, time_ago, read } = this.feeds[i];
+    this.store.currentPage = Number(location.hash.substr(7) || 1);
+    for(let i = (this.store.currentPage-1)*10; i < this.store.currentPage*10; i++) {
+      const { id, title, comments_count, user, points, time_ago, read } = this.store.getFeed(i);
       this.addHtml( `
         <div class="p-6 ${read ? 'bg-gray-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
           <div class="flex">
@@ -72,15 +70,10 @@ export default class NewsFeedView extends View {
     }
   
     this.setTemplateData('news_feed', this.getHtml());
-    this.setTemplateData('prev_page', String(window.store.currentPage > 1 ? window.store.currentPage -1 : 1) );
-    this.setTemplateData('next_page', String(window.store.currentPage + 1) );
+    this.setTemplateData('prev_page', String(this.store.prevPage));
+    this.setTemplateData('next_page', String(this.store.nextPage));
   
-    this.updateView()
+    this.updateView();
   }
-
-  // 읽은 글 표시하기 위한 프로퍼티 추가
-  private makeFeeds() {
-    this.feeds.forEach(feed => feed.read = false);
-}
 
 }

@@ -1,9 +1,18 @@
 import View from '../core/view';
 
 // 타입 생성: interface 이용. 기존 type alias, &(intersection, 상속 유사), |(pipeline, or 유사) 이용.
-interface Store {
+interface NewsStore {
+  getAllFeeds: () => NewsFeed[];
+  getFeed: (position: number) => NewsFeed;
+  setFeeds: (feeds: NewsFeed[]) => void;
+  makeRead: (id: number) => void;
+  hasFeeds: boolean;
   currentPage: number;
-  feeds: NewsFeed[];
+  numberOfFeed: number;
+  nextPage: number;
+  prevPage: number;
+  // feeds: NewsFeed[];
+
 }
 
 interface News {
@@ -34,4 +43,4 @@ interface RouteInfo {
   page: View;
 }
 
-export { Store, News, NewsFeed, NewsDetail, NewsComment, RouteInfo }
+export { NewsStore, News, NewsFeed, NewsDetail, NewsComment, RouteInfo }

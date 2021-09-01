@@ -1,6 +1,6 @@
 import View from '../core/view';
 import { NewsDetailApi } from '../core/api';
-import { NewsDetail, NewsComment } from '../types';
+import { NewsDetail, NewsComment, NewsStore } from '../types';
 import { CONTENT_URL } from '../config';
 
 const template: string = `
@@ -34,10 +34,12 @@ const template: string = `
 
 // 글 내용 구성 & 출력
 export default class NewsDetailView extends View {
+  private store: NewsStore;
 
-  constructor(containId: string) {
+  constructor(containerId: string, store: NewsStore) {
+    super(containerId, template);
 
-    super(containId, template);
+    this.store = store;
   }
 
   render() {
@@ -45,13 +47,9 @@ export default class NewsDetailView extends View {
     const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
     const newsDetail: NewsDetail = api.getData();
 
-    // 읽은 글 표시하기 위한 프로퍼티(read) 추가. 값을 true로 할당
-    const found = window.store.feeds.find( obj => obj.id === Number(id) );
-    if (found != undefined)
-      found.read = true;
-
+    this.store.makeRead(Number(id));
     this.setTemplateData('comments', this.makeComment(newsDetail.comments));
-    this.setTemplateData('currentPage', String(window.store.currentPage));
+    this.setTemplateData('currentPage', String(this.store.currentPage));
     this.setTemplateData('title', newsDetail.title);
     this.setTemplateData('content', newsDetail.content);
     this.updateView();
