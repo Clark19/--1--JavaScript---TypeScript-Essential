@@ -6,8 +6,6 @@ export class Api {
 
   constructor(url: string) {
     this.url = url;
-    this.xhr = new XMLHttpRequest();
-    // ajax 부분 : XMLHttpRequest. 학습 위해 fetch()와 비동기 사용 안함.
   }
 
   protected async request<AjaxResponse>(): Promise<AjaxResponse> {
