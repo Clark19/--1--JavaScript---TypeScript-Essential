@@ -41,20 +41,13 @@ export default class NewsFeedView extends View {
   }
 
   // render = (page: string = '1'): void => {
-  render(): void {
+  async render(): Promise<void> {
     this.store.currentPage = Number(location.hash.substr(7) || 1);
 
-    if (!this.store.hasFeeds) {
-      this.api.getDataWithPromise((feeds: NewsFeed[]) => {
-        this.store.setFeeds(feeds);
-        this.renderView();
-      });
-    }
+    if (!this.store.hasFeeds)
+      this.store.setFeeds(await this.api.getData());
 
-    this.renderView();
-  }
-
-  renderView = () => {
+    // this.renderView();
     for(let i = (this.store.currentPage-1)*10; i < this.store.currentPage*10; i++) {
       const { id, title, comments_count, user, points, time_ago, read } = this.store.getFeed(i);
       this.addHtml( `
@@ -84,5 +77,9 @@ export default class NewsFeedView extends View {
   
     this.updateView();
   }
+
+  // renderView = () => {
+
+  // }
 
 }
