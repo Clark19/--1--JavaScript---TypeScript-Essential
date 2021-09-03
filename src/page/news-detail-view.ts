@@ -45,7 +45,7 @@ export default class NewsDetailView extends View {
   render() {
     const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
     const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
-    api.getData((data: NewsDetail) => {
+    api.getDataWithPromise((data: NewsDetail) => {
       const newsDetail: NewsDetail = data;
       
       this.store.makeRead(Number(id));
