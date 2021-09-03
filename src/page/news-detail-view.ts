@@ -45,14 +45,17 @@ export default class NewsDetailView extends View {
   render() {
     const id = location.hash.substr(7); // # 짤라내고 hash 값 가져오기
     const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
-    const newsDetail: NewsDetail = api.getData();
+    api.getData((data: NewsDetail) => {
+      const newsDetail: NewsDetail = data;
+      
+      this.store.makeRead(Number(id));
+      this.setTemplateData('comments', this.makeComment(newsDetail.comments));
+      this.setTemplateData('currentPage', String(this.store.currentPage));
+      this.setTemplateData('title', newsDetail.title);
+      this.setTemplateData('content', newsDetail.content);
+      this.updateView();
+    });
 
-    this.store.makeRead(Number(id));
-    this.setTemplateData('comments', this.makeComment(newsDetail.comments));
-    this.setTemplateData('currentPage', String(this.store.currentPage));
-    this.setTemplateData('title', newsDetail.title);
-    this.setTemplateData('content', newsDetail.content);
-    this.updateView();
   }
 
   makeComment(comments: NewsComment[]): string {
