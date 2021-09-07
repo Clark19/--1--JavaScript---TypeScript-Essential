@@ -72,7 +72,7 @@ export default class TextField {
     const { value, id } = e.target as HTMLInputElement;
   
     if (id === this.data.id) {
-      this.updated = true;
+      this.updated = true; // 최초에 변경이 발생했는지 여부. 즉, 한번이라도 입력했는지 여부를 나타내는 상태 값. 그래서 변경됐으니 이 루틴 탄거므로 true 세팅.
       this.data.text = value;
       this.update();
     }
@@ -87,6 +87,9 @@ export default class TextField {
     const docFrag = document.createElement('div');
 
     docFrag.innerHTML = this.template(this.buildData());
+    /* render() 함수와 다르게 innderHtml만 대입하는 이유는 이벤트 핸들러를 상위 컴포넌트에 붙였는데 돔으로 붙이면
+        이벤트 핸들러 까지 날라가 버려서 안의 내용만 업데이트 하는 형식으로 함. 
+    */
     container.innerHTML = docFrag.children[0].innerHTML;
   }
 
