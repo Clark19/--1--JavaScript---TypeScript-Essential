@@ -3,6 +3,8 @@ import { ValidateRule } from '../types';
 import template from './password-field.template';
 import { RequireRule } from '../constant';
 
+// TypeScript 에도 enum 타입이 있는 듯.
+// StrongLevel은 다음 단계로 진행을 안 시킬 정도의 밸리데이션은 아님.
 enum StrongLevel {
   None = 0,
   Light,
@@ -19,6 +21,7 @@ type Props = {
   strong?: StrongLevel;
 }
 
+// 튜플로 메시지 구성. 튜플로 하면 단순 배열에 비해 여러가지 장점이 있다고 함.
 const StrongMessage: [string, string, string, string] = [
   '금지된 수준',
   '심각한 수준',

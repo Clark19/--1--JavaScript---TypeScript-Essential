@@ -30,6 +30,7 @@ export default class TextField {
 
   constructor(container: string, data: Props) {
     this.container = container;
+    // 사용자가 입력한 값 == data
     this.data = { ...DefaultProps, ...data };
 
     if (this.data.require) {
@@ -42,15 +43,19 @@ export default class TextField {
   private validate = (): ValidateRule | null => {
     const target = this.data.text ? this.data.text.trim() : '';
 
+    // 배열을 filter()로 돌면서 test()로 정규식 매칭 여부 판단함.
     const invalidateRules = this.validateRules
       .filter(validateRule => validateRule.rule.test(target) !== validateRule.match);
 
+    // 기획따라 UX를 선택하며 됨. 룰 위반이 2개이상일때 어떤식으로 에러 출력 하나만 할지 둘 이상할지
+    // 기획에 따라 아래 코드가 달라짐. 현재는 무조건 첫번재 룰 위반만 알려주는 정책으로 구현.
     return (invalidateRules.length > 0) ? invalidateRules[0] : null;
   }
 
   private buildData = () => {
     const isInvalid: ValidateRule | null = this.validate();
 
+    // 최초엔 사용자가 아무 것도 안했으므로 밸리데이션이 걸려도 무시하고 사용자에게 피드백을 주지 않게 하기 위한 조건절.
     if (this.updated) {
       return {
         ...this.data, 
@@ -78,6 +83,9 @@ export default class TextField {
     }
   }
 
+  /* 이벤트 핸들러를 자신에 걸지않고 부모에 건다. 그래서 onChange()에
+     이벤트 들어오면 어떤 자식의 이벤트인지 id로 체크하여 해당 ui coponent만 update()호출.
+     이벤트의 버블링/캡쳐링 이용하는 것임. */
   private attachEventHandler = () => {
     document.querySelector(this.container)?.addEventListener('change', this.onChange);
   }
@@ -86,9 +94,10 @@ export default class TextField {
     const container = document.querySelector(`#field-${this.data.id}`) as HTMLElement;
     const docFrag = document.createElement('div');
 
+    // 밸리데이션응 buildDate()에서 함. 그 결과를 template로 넘기면 UI(HTML)을 변경하는 것임. 즉, HTML을 template에서 변경하면 사용자에게 알림을 주는 것이됨.
     docFrag.innerHTML = this.template(this.buildData());
     /* render() 함수와 다르게 innderHtml만 대입하는 이유는 이벤트 핸들러를 상위 컴포넌트에 붙였는데 돔으로 붙이면
-        이벤트 핸들러 까지 날라가 버려서 안의 내용만 업데이트 하는 형식으로 함. 
+        이벤트 핸들러 까지 날라가 버려서 안의 내용만 업데이트 하는 형식으로 함. 메모리 문제도 생길수있음.
     */
     container.innerHTML = docFrag.children[0].innerHTML;
   }
