@@ -1,3 +1,4 @@
+/* Context 강의 실습 코드 */
 const person = {
   name: 'Kim min tae',
   age: 40,
@@ -28,7 +29,9 @@ class Person {
     return this.age;
   }
 
-  // lexical 컨텍스트 예: arrow function 사용하면 언제나 객체 만들때 고정된다 
+  // lexical(어휘적) 컨텍스트 예: arrow function 사용하면 언제나 객체 만들때 고정된다.
+  // 화살표 함수의 this는 어휘적 컨텍스트에 의해 getName 속성(메서드?)가 생성될때의 this로 고정됨.
+  // arrow function, call/apply/bind() 쓰면 this를 다른 것으로 바인드 할 수 없으므로 주의해야 함.
   getName = () => this.name;
 }
 
@@ -37,4 +40,10 @@ console.log(p1.getAge());
 
 
 const myAge = p1.getAge;
-// myAge.call(p1); => 클래스
+// console.log(myAge.call(p1)); => 클래스
+
+
+console.log(p1.getName());
+
+const x= p1.getName;
+console.log(x()); // p1.getName() 과 화살표 함수 때문에 동일한 결과가 됨. 
