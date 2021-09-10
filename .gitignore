@@ -4,7 +4,6 @@
 dist
 .cache
 .idea
-.vscode
 
 # npm 디버그 기록이나 각종 로그 파일
 *.log
