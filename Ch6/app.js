@@ -25,3 +25,20 @@ function double(x) {
   
   const d = new Double(10);
   d.getValue();
+
+
+  // ch6_01 식별자
+  let age = 10;
+  const AGE = 10;
+
+  function setAge() {
+
+  }
+
+  const o = {
+    age: 10,
+    ['myName']: '김'
+  }
+  o.myName
+
+
