@@ -47,3 +47,35 @@ console.log(p1.getName());
 
 const x= p1.getName;
 console.log(x()); // p1.getName() 과 화살표 함수 때문에 동일한 결과가 됨. 
+
+
+
+
+// Class Practice 2021.09.15
+class Greeter {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+
+let greeter = new Greeter("world");
+
+// Class Inheritance
+class Animal {
+  move(distanceInMeters: number = 0) {
+    console.log(`Animal moved ${distanceInMeters}m.`);
+  }
+}
+class Dog extends Animal {
+  bark() {
+    console.log('Woof! Woof!');
+  }
+}
+const dog = new Dog();
+dog.bark();
+dog.move(10);
+dog.bark();
