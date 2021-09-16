@@ -29,3 +29,16 @@ function main() {
 }
 
 main();
+
+
+
+// Ch6.03. 문법-타입 : 2021.09.16
+function addAge(age) {
+    return age + 1;
+}
+
+let age = addAge('30');
+
+age = 30;
+age = false;
+age = {};
