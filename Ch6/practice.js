@@ -43,3 +43,23 @@ function foo() { ... }
 아래 처럼 작성하고 실행해도 별 이상 없이 잘 실행되는 걸로 보아 소괄호로 감싸지 않아도 함수는 값인거 같은데, 강사님의 말은 아마도 소괄호로 감싸면 값으로 활용할 수 있는 테크닉 같은 걸 강조한걸 아닐까 추측해 본다. */
 let fun = function() {console.log( 1);};
 let fun2 = function foo() {console.log(2);};
+
+
+// Ch06_06. 문법-참조와 복사 실습
+let a = 10;
+let b = a;
+b = 20;
+
+let o = {
+    isLoading: false,
+}
+let o2 = o;
+// o2.isLoading = true;
+
+function foo() {
+    o.isLoading = true;
+}
+foo(o);
+console.log(o.isLoading);
+
+console.log('done');
