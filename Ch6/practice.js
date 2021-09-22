@@ -13,6 +13,7 @@ const Colors = {
 // 구조 분해 할당자 연산
 const {red, yellow, black} = colors;
 const { green, white} = Colors;
+dd
 
 
 // 동등 비교 연산
@@ -63,3 +64,27 @@ foo(o);
 console.log(o.isLoading);
 
 console.log('done');
+
+
+// Ch06_07. 문법-조건(분기)문 강의 실습
+let age = 40;
+if (age === 10 || age > 30) {
+} else if (!is) {
+} else {
+}
+
+switch(age) {
+    case 1:
+      break;
+    case 2:
+        break;
+    default:
+      break;
+}
+
+// 아래와 같은 if 문의 경우 switch 문이 더 좋다
+// if 문 안의 비교대상이 age로 같고, 범위 비교가 아니라  === 같은 동등 비교일 때
+if (age === 1) {
+} else if (age === 2) {
+} else if (age === 3) {
+} else { }
