@@ -66,7 +66,7 @@ console.log(o.isLoading);
 console.log('done');
 
 
-// Ch06_07. 문법-조건(분기)문 강의 실습
+// Ch06_07. 문법-조건(분기)문 강의 실습. 2021.09.22
 let age = 40;
 if (age === 10 || age > 30) {
 } else if (!is) {
@@ -88,3 +88,43 @@ if (age === 1) {
 } else if (age === 2) {
 } else if (age === 3) {
 } else { }
+
+
+
+// Ch06_08. 문법-조건(분기)문 강의 실습. 2021.09.23
+const arr = ['q', 'w', 'e', 'r'];
+
+for (let i=0; i < arr.length; i++) {
+    console.log(arr[i]);
+}
+
+let i = 0;
+while (i < arr.length) {
+    console.log(arr[i]);
+    i++;
+}
+
+i=0;
+do {
+    console.log(arr[i]);
+    i++;
+} while(i < arr.length)
+
+
+for (const item of arr) {
+    console.log(item);
+}
+
+for (const idx in arr) {
+    console.log(arr[idx]);
+}
+
+const obj = {
+    hobby: 'soccer',
+    name: 'John',
+    age: 20,
+};
+
+for (const key in obj) {
+    console.log(key);
+}
