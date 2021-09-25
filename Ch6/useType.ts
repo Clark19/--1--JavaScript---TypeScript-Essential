@@ -43,6 +43,7 @@ const getApi: type.IGetApi = (url, search = '') => {
 
 getApi('./api/users').then(data => console.log(data));
 
+// interface를 class 사용로 구현시 implements 사용. 기존 자바 문법과 유사.
 class Rect implements type.IRect {
     id : number;
     x: number;

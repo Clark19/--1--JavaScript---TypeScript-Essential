@@ -37,7 +37,7 @@ export type TUser = {
 // 상속시 extends 키워드 사용
 export interface IUserProfile extends IUser {
     profileImage: string;
-    githyub?: string;
+    github?: string;
     twitter?: string;
 }
 
