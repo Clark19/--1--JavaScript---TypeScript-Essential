@@ -128,3 +128,50 @@ const obj = {
 for (const key in obj) {
     console.log(key);
 }
+
+
+// Ch06_13. 문법-일급 함수 (일급 객체) 실습 2021.09.27
+// 1. 함수는 무명의 리터럴로 생성할 수 있다.
+// 2. 함수는 변수에 저장살 수 있다.
+// 런타임(할당 단계)예 함수 리터럴이 평가되어 함수 객체가 생성되고 변수에 할당된다.
+const increase = function(num) {
+	return ++num;
+}
+
+const decrease = function(num) {
+	return --num;
+}
+
+// 2. 함수는 객체에 저장할 수 있다.
+const predicates = { increase, decrease }
+
+// 3. 함수의 매개변수에 전달할 수 있다.
+// 4. 함수의 반환값으로 사용할 수 있다.
+function makeCounter(predicate) {
+	let num = 0;
+
+	return function() {
+		num = predicate(num);
+		return num;
+	};
+}
+
+// 3. 함수는 매개변수에게 함수를 전달할 수 있다.
+// 여기선 Closure를 이용하고 있다
+const increaser = makeCounter(predicates.increase);
+console.log(increaser()); // 1
+console.log(increaser()); // 2
+
+// 3. 함수는 매개변수에게 함수를 전달할 수 있다.
+const decreaser = makeCounter(predicates.decrease);
+console.log(decreaser()); // -1
+console.log(decreaser()); // -2
+
+/* 함수는 객체이지만 일반 객체와는 차이가 있다. 일반 객체는 호출 할 수 없지만 함수 객체는 호출할 수 있다.
+그리고 함수 객체는 일반 객체에는 없는 함수 고유의 프로퍼티를 소유한다.
+square 함수의 모든 프로퍼티의 프롤퍼티 어트리뷰트를 아래 코드처럼 Object.getOwnPropertyDescriptors() 메서드로 확인할 수 있다. */
+function square(number) {
+    return number * number;
+}
+
+console.log(Object.getOwnPropertyDescriptors(square));
