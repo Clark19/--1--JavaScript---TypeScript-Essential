@@ -93,3 +93,37 @@ Setter와 Getter라는 것이다.(Java 같은 언어의 setter, getter 과는 �
 p1.bloodType = 'C'; */
 p1.bloodType;
 p1.bloodType = 'C'; // 이렇게 하면 아무것도 대입 되지 않는다. set bloodType() {} 안의 if문에 의해서.
+
+
+
+// Ch06_14. 문법-비동기 함수 (async await) 실습 2021.09.28
+function delay(ms: number): Promise<string> {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			if (Math.floor(Math.random() * 10) % 2 === 0) {
+				resolve('success');
+			} else {
+				reject('failure');
+			}
+		}, ms);
+	});
+}
+
+delay(3000)
+	.then((result: string) => {
+		console.log('done promise!' + result);
+	})
+	.catch((error: string) => {
+		console.error('fail promise' + error);
+	});
+
+async function main() {
+	try {
+		const result = await delay(3000);
+		console.log('done async' + result);
+	} catch(e) {
+		console.log('fail async' + e);
+	}
+}
+
+main();
