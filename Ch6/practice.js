@@ -175,3 +175,43 @@ function square(number) {
 }
 
 console.log(Object.getOwnPropertyDescriptors(square));
+
+
+
+
+// Ch06_15. 문법-생성기(제너레이터) 함수 실습  2021.09.29 -  https://poiemaweb.com/es6-generator (이웅모님 블로그)
+function* counter() {
+    console.log('첫번째 호출');
+    yield 1;                  // 첫번째 호출 시에 이 지점까지 실행된다.
+    console.log('두번째 호출');
+    yield 2;                  // 두번째 호출 시에 이 지점까지 실행된다.
+    console.log('세번째 호출');  // 세번째 호출 시에 이 지점까지 실행된다.
+  }
+  
+  const generatorObj = counter();
+  
+  console.log(generatorObj.next()); // 첫번째 호출 {value: 1, done: false}
+  console.log(generatorObj.next()); // 두번째 호출 {value: 2, done: false}
+  console.log(generatorObj.next()); // 세번째 호출 {value: undefined, done: true}
+
+
+//   패캠 김민태 프론트엔드 아케데미
+  function infiniteEnergyGenerator() {
+    let energy = 1;
+    while (true) {
+        const booster = yield energy;
+
+        if (booster) {
+            energy += booster;
+        } else {
+            energy++;
+        }
+    }
+}
+
+const energyGenerator = infiniteEnergyGenerator();
+for (let i = 0; i < 5; i++) {
+    console.log(energyGenerator.next());   
+}
+
+console.log(energyGenerator.next(5));
