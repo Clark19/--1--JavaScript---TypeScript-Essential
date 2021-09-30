@@ -1,3 +1,5 @@
+<!-- 부드러운 스크롤링 페이지/메뉴 만들기 기본형태(Skeleton) - 위아래로 긴 페이지 2021. 10.01 -->
+
 <style>
   ul { display: flex; }
 </style>
@@ -86,8 +88,8 @@ document.querySelectorAll('nav a').forEach(element => {
     evt.preventDefault();
     const target = document.querySelector(evt.target.getAttribute('href'));
     window.scrollTo({
-      'behavior': 'smooth',
-      'top': target.offsetTop
+      behavior: 'smooth',
+      top: target.offsetTop
     });
   };
 });
