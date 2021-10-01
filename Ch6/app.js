@@ -42,3 +42,56 @@ function double(x) {
   o.myName
 
 
+
+
+// Ch06_17. 문법-객체-프로그래밍 도구로서의 객체 2021.10.01 실습
+function calculateCircleArea(radius) {
+  return radius * radius * Math.PI;
+}
+
+function calculateRectArea(width, height) {
+  return width * height;
+}
+
+class Circle {
+  #radius;
+
+  constructor(radius) {
+    this.#radius = radius;
+  }
+
+  get radius() {
+    return this.#radius;
+  }
+
+  area = () => this.#radius * this.#radius * Math.PI;
+}
+
+class Rect {
+  #width;
+  #height;
+
+  constructor(width, height) {
+    this.#width = width;
+    this.#height = height;
+  }
+
+  get width() {
+    return this.#width;
+  }
+
+  get height() {
+    return this.#height;
+  }
+}
+
+const circle = new Circle(50);
+const rect = new Rect(150, 200);
+
+// 안좋은 예
+console.log(calculateCircleArea(circle.radius));
+console.log(calculateRectArea(rect.width, rect.height));
+
+// 위보다 좋은 예
+console.log(circlee.area());
+console.log(rect.area());
