@@ -271,3 +271,185 @@ console.log(sumNumbers(10, 20, 30, 40, 50));
 function sumNumbersForES6(...args) {
   return args.reduce((a, b) => a+b, 0);
 }
+
+
+
+/*  < 클래스 Class > - Ch06_21강
+< JavaScript Class > - 자바스크립트 클래스 실습 2021.10.04
+*/
+// ES5에서 함수의 프로토타입 메커니즘을 이용한 객체 생성 예
+// 프로토타입 기반으로 객체 생성 코드 틀
+var Person = (function() {
+  // 생성자 함수
+  function Person(name) {
+    this.name = name;
+  }
+
+  // 프로토타입 메서드
+  Person.prototype.sayHi = function() {
+    console.log('HI! My name is ' + this.name);
+  };
+
+  // 생성자 함수 반환
+  return Person;
+}());
+
+// !주의: new 안붙여도 에러는 안나지만, 일반 함수 호출이므로 Person 객체가 생성이 안되므로,
+// 꼭 new 붙여야 함.
+var me = new Person('Lee');
+me.sayHi(); // Hi! My name is Lee
+
+
+
+
+class Rectangle {
+  #height = 0;
+  #width;
+  #privateProp = 0; // private 프로퍼티
+  constructor(height, width) {
+    this.#height = height;
+    this.#width = width;
+  }
+}
+
+
+
+class YourClass extends MyClass {
+  constructor(name) {
+    super(name); // super class 생성자를 호출하여 name 매개변수 전달
+  }
+
+  speak() {
+    console.log(`${this.name} barks.`);
+  }
+}
+
+
+
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+
+  speak() {
+    console.log(`${this.name} makes a noise.`);
+  }
+}
+
+class Dog extends Animal {
+  constructor(name) {
+    super(name); // super class 생성자를 호출하여 name 매개변수 전달
+  }
+
+  speak() {
+    console.log(`${this.name} barks.`);
+  }
+}
+
+let d = new Dog('Mitzie');
+d.speak(); // Mitzie barks.
+// ES5의 프로토타입 기반 객체 생성은 문법적으로는 번잡스럽고, 불편했던 부분들이 있었다.
+// 클래스 기반 언어에 익숙한 프로그래머들은 프로토타입 기반 프로그래밍 방식에 혼란을 느낄 수 있어, 하나의 진입 장벽으로 작용될 수 있다.
+
+
+/* ES6이후 Class 문법이 추가되어, 기존 프로토타입 기반 객체지향 프로그래밍보다 자바나 C#과 같은 클래스 기반 객체지향에 익숙한 프로그래머가 더욱 빠르게 학습할 수 있도록 클래스 기반 객체지향 프로그래밍 언어와 매우 비슷한 객체 생성 메커니즘을 제공해준다.
+
+ * Class 기본 코드 예시 - 더 자세한 사항은 https://ko.javascript.info/classes 를 참고. https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Classes, https://poiemaweb.com/js-object-oriented-programming
+ */
+class MyClass {
+  prop = value; // public 프로퍼티
+  #privateProp = 0; // private 프로퍼티
+// protected 는 꼼수로 구현해야 한다 - https://ko.javascript.info/private-protected-properties-methods#ref-1079
+
+  constructor(...) { // 생성자 메서드
+    // ...
+  }
+
+  method(...) {} // 메서드
+
+  get something(...) {} // getter 메서드
+  set something(...) {} // setter 메서드
+
+  [Symbol.iterator]() {} // 계산된 이름(computed name)을 사용해 만드는 메서드 (심볼)
+  // ...
+}
+
+
+
+
+// 상속
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+
+  speak() {
+    console.log(`${this.name} makes a noise.`);
+  }
+}
+
+class Dog extends Animal {
+  constructor(name) {
+    super(name); // super class 생성자를 호출하여 name 매개변수 전달
+  }
+
+  speak() {
+    console.log(`${this.name} barks.`);
+  }
+}
+
+let d = new Dog('Mitzie');
+d.speak(); // Mitzie barks.
+
+
+
+
+class Counter extends HTMLElement {
+  #x = 0;
+
+  clicked() {
+    this.#x++;
+    window.requestAnimationFrame(this.render.bind(this));
+  }
+
+  constructor() {
+    super();
+    this.onclick = this.clicked.bind(this);
+  }
+
+  connectedCallback() { this.render(); }
+
+  render() {
+    this.textContent = this.#x.toString();
+  }
+}
+window.customElements.define('num-counter', Counter);
+/* ( *참고 : public과  private 필드(프로퍼티) 선언은 최신 문법이다. 2021.10.04 기준으로 아직 표준으로 확정되진 않았지만, 표준이 유력한 단계에 와있다.
+자바스크립트 표준화 위원회 TC39의 5단계 표준 진행 절차 중 표준으로 될 확률이 유력한 네번째 단계인 stage 3 에 제안되어 있습니다. stage 4로 올라가면 finished 상태가 되고 표준 발표만 기다리는 상태라고 합니다. 예외적인 큰 구현 이슈가 없는 이상 말이죠. )
+
+
+그렇다고 ES6의 클래스가 기존의 프로토타입 기반 객체지향 모델을 폐지하고 새롭게 클래스 기반 객체지향 모델을 제공하는 것은 아니다.
+사실 클래스는 함수이며 기존 프로토타입 기반 패턴을 클래스기반 패턴처럼 사용할 수 있게 해준다.
+
+
+그래서 타언어 프로그래머들이 훨씬 더 간편하고 손쉽게 객체를 만들고 디자인 할 수 있게 되었다.
+Class는 생성자 함수 기반의 객체 생성 방식보다 견고하고 명료한 방식이다.
+특히 extends와 super 키워드는 상속 관계 구현을 더욱 간결하고 명료하게 한다.
+
+
+프로토 타입 메커니즘에서 객체에서 속성이나 메서드를 접급할 때,
+그 객체가 가지고 있는지 먼저 찾고, 발견되지 않으면 프로토타입 체이닝상 상위 객체로 타고 올라가서 찾아보고
+있으면 그걸 사용하고, 없는면 undefined가 되는 메커니즘이다.
+
+
+클래스와 생성자 함수는 모두 프로토타입 기반의 인스턴스를 생성하지만 정확히 동일하게 동작하지는 않는다.
+클래스는 생성자 함수보다 엄격하며, 생성자 함수에서는 제공하지 않는 기능도 제공한다..
+클래스는 생성자 함수와 매유 유사하게 동작하지만 다음과 같이 몇 가지 차이가 있다.
+1. 클래스를 new 연산자 없이 호출하면 에러가 발생. 하지만 생성자 함수를 new 연산자 없이 호출하면 일반 함수로서 호출된다.
+2. 클래스는 상속을 지원하는 extends와 super 키워드를 제공한다. 하지만 생성자 함수는 extends와 super 키워드를 지원하지 않는다.
+3. 클래스는 호이스팅이 발생하지 않는 것처럼 동작한다. 하지만 함수 선언문으로 정의된 생성자 함수는 함수 호이스팅이, 함수 표현식으로 정의한 생성자 함수는 변수 홍이스팅이 발생한다.
+4. 클래스 내의 모든 코드는 암묵적으로 strict mode가 지정되어 실행되며 strict mode를 해제할 수 없다. 하지만 생성자 함수는 암묵적으로 strict mode가 지정되지 않는다.
+5. 클래스의 constructor, 프로토타입 메서드, 정적 메서드는 모두 프로퍼티 어트리뷰트 [[Enumerable]]의 값이 false이다. 다시 말해 열거되지 않는다.
+
+따라서 클래스를 프로토타입 기반 객체 생성 패턴의 단순한 문법적 설탕(Syntatic sugar)이라고 보기보다는 새로운 객체 생성 메커니즘으로 보는 것이 조금 더 합당하다.
+*/
