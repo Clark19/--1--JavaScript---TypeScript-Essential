@@ -239,8 +239,8 @@ const henry = shakespeareTwoBooks.filter(book => book.title.includes("헨리"));
 - .reduce() : 누적/합산 메서드 - 합산을 숫자만 하는게 아니라 객체 merge를 하기도 함.
 - 숫자를 더하는 동작에도 쓰지만, 저렇게 동작하는 메커니즘을 이용해서 굉장히 다양한 응용이 있다.
 */
-const someNumbers = [10, 5, 3, 14, 56];
-const sumNumbers = someNumbers.reduce((a,b) => a+b, 0);
+const nums = [10, 5, 3, 14, 56];
+const numsSum = nums.reduce((a,b) => a+b, 0);
 /* 함수의 파라미터 (a,b) 에서 b엔 배열 인덱스0 에 해당하는 요소부터 차례대로 들어온다. 10, 5, 3, 14, 56
     a엔 처음엔 0이 들어오고( => a+b, 0 에서 이 0이 초기값이다.), 그 다음 차례부턴 a+b에 해당하는 값들이 들어온다.
     즉, 처음 a엔  0이고 그래서 처음엔 리듀스 메서드가 a+b를 리턴하면 그 리턴한 값을 다음번 a 파라미터에 전달한다.
@@ -248,12 +248,12 @@ const sumNumbers = someNumbers.reduce((a,b) => a+b, 0);
 */
 
 // 배열 안에 여러개의 객체가 존재 할때, 그 객체들을 하나의 객 체로 합치는 데도 사용 가능.
-const someObjects = [
-{border: "none"},
-{fontSize: 24},
-{className: "box sm-box"}
+const obj = [
+  {clsName: "rect mini"},
+  {fontSize: 20},
+  {border: "1rem"}
 ];
-const obj = someObjects.reduce((a,b) => ({...a, ...b}), {}); // 요소들이 하나로 합쳐진 객체로 됨
+const obj = obj.reduce((a,b) => ({...a, ...b}), {}); // 요소들이 하나로 합쳐진 객체로 됨
 
 
 /*
@@ -261,14 +261,14 @@ const obj = someObjects.reduce((a,b) => ({...a, ...b}), {}); // 요소들이 하
 - Array.from(유사배열).reduce() 형태로 이용 가능:
 */
 // arguments 는 es5 시대 사용하던 거라, 가독성, 표현력 안좋고, 버그 발생 가능성 있어서 이런게 있구나 정도로만 알면됨. legacy 코드 유지보수/포팅 할 때만 알면 됨.
-// 새로 작성하는 코드는 sumNumbersForES6()에 있는 것처럼 전개 파라미터(...args)를 사용할 것.
-function sumNumbers() {
+// 새로 작성하는 코드는 sumNumsForES6()에 있는 것처럼 전개 파라미터(...args)를 사용할 것.
+function sumNums() {
   return Array.from(arguments).reduce((a, b) => a+b, 0);
 }
-console.log(sumNumbers(10, 20, 30, 40, 50));
+console.log(sumNums(3, 4, 5, 6, 7));
 
 
-function sumNumbersForES6(...args) {
+function sumNumsForES6(...args) {
   return args.reduce((a, b) => a+b, 0);
 }
 

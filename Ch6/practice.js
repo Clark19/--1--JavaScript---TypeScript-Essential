@@ -215,3 +215,21 @@ for (let i = 0; i < 5; i++) {
 }
 
 console.log(energyGenerator.next(5));
+
+
+
+// Ch06_25. 문법-클로저 Closure 실습 2021.10.07
+function outer() {
+    let num = 1;
+    return function() {
+      return num++;
+    };
+  }
+  
+  const inner = outer();
+  
+  console.log(inner());
+  console.log(inner());
+  console.log(inner());
+  
+  
